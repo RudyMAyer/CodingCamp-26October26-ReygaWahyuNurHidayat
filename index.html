@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Expense &amp; Budget Visualizer</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <h1>💰 Expense &amp; Budget Visualizer</h1>
+    <button id="theme-toggle" title="Toggle dark mode" aria-pressed="false">🌙 Dark Mode</button>
+  </header>
+  <main>
+    <!-- Total Balance -->
+    <section class="balance-card" aria-label="Ringkasan saldo">
+      <p class="label">TOTAL BALANCE</p>
+      <strong id="total-balance" aria-live="polite" aria-atomic="true">Rp 0</strong>
+      <dl class="summary-row">
+        <div class="summary-item income-summary">
+          <dt class="summary-label">↑ Income</dt>
+          <dd id="summary-income" class="summary-value">Rp 0</dd>
+        </div>
+        <div class="summary-divider" role="separator" aria-hidden="true"></div>
+        <div class="summary-item expense-summary">
+          <dt class="summary-label">↓ Expenses</dt>
+          <dd id="summary-expense" class="summary-value">Rp 0</dd>
+        </div>
+      </dl>
+      <!-- Spending Limit Warning -->
+      <div id="limit-warning" class="limit-warning" aria-live="polite" hidden>
+        ⚠️ <span id="limit-warning-text"></span>
+      </div>
+    </section>
+
+    <!-- Spending Limit + Custom Categories (side by side on wide screens) -->
+    <div class="grid-2">
+      <!-- Spending Limit -->
+      <section class="card slide-up" aria-label="Spending limit">
+        <h2>🎯 Spending Limit</h2>
+        <p class="section-desc">Set a monthly spending limit. You'll be warned when you're close or over it.</p>
+        <form id="limit-form" novalidate>
+          <label for="spending-limit">Monthly Limit (Rp)</label>
+          <div class="limit-input-row">
+            <input
+              type="number"
+              id="spending-limit"
+              name="spending-limit"
+              min="0"
+              step="1000"
+              placeholder="e.g. 1000000"
+              aria-label="Monthly spending limit"
+            />
+            <button type="submit">Set</button>
+          </div>
+          <p id="current-limit-display" class="current-limit-text"></p>
+        </form>
+      </section>
+
+      <!-- Custom Categories -->
+      <section class="card slide-up" style="--delay:0.05s" aria-label="Custom categories">
+        <h2>🏷️ Custom Categories</h2>
+        <p class="section-desc">Add your own categories beyond the defaults.</p>
+        <form id="category-form" novalidate>
+          <div class="limit-input-row">
+            <input
+              type="text"
+              id="new-category"
+              name="new-category"
+              placeholder="e.g. Health, Bills…"
+              autocomplete="off"
+              maxlength="24"
+              aria-label="New category name"
+            />
+            <button type="submit">Add</button>
+          </div>
+          <output id="cat-error" class="error" role="alert" aria-live="assertive"></output>
+        </form>
+        <ul id="custom-category-list" class="custom-cat-list" aria-label="Custom categories list"></ul>
+      </section>
+    </div>
+
+    <!-- Input Form -->
+    <section class="card slide-up" style="--delay:0.1s" aria-label="Tambah transaksi">
+      <h2>Add Transaction</h2>
+      <form id="transaction-form" novalidate>
+        <label for="item-name">Item Name</label>
+        <input
+          type="text"
+          id="item-name"
+          name="item-name"
+          placeholder="e.g. Makan siang, Gaji…"
+          autocomplete="off"
+          required
+          aria-required="true"
+          aria-describedby="form-error"
+        />
+        <div class="row-2">
+          <div>
+            <label for="amount">Amount (Rp)</label>
+            <input
+              type="number"
+              id="amount"
+              name="amount"
+              step="1"
+              min="0"
+              placeholder="0"
+              required
+              aria-required="true"
+              aria-describedby="form-error"
+            />
+          </div>
+          <div>
+            <label for="tx-type">Type</label>
+            <select id="tx-type" name="tx-type">
+              <option value="expense">💸 Expense</option>
+              <option value="income">💵 Income</option>
+            </select>
+          </div>
+        </div>
+        <label for="category">Category</label>
+        <select id="category" name="category" required aria-required="true" aria-describedby="form-error">
+          <!-- Options populated dynamically by JS -->
+        </select>
+        <button type="submit">＋ Add Transaction</button>
+        <output id="form-error" class="error" role="alert" aria-live="assertive"></output>
+      </form>
+    </section>
+
+    <!-- Transactions + Chart -->
+    <div class="grid-2">
+      <section class="card slide-up" style="--delay:0.15s" aria-label="Daftar transaksi">
+        <header class="card-header">
+          <h2>Transactions</h2>
+          <nav id="filter-nav" class="filters" aria-label="Filter kategori transaksi">
+            <!-- Filter buttons populated dynamically by JS -->
+          </nav>
+        </header>
+        <ul id="transaction-list" class="transaction-list" aria-live="polite" aria-label="Riwayat transaksi"></ul>
+      </section>
+      <section class="card slide-up" style="--delay:0.2s" aria-label="Grafik kategori">
+        <header class="card-header">
+          <h2 id="chart-title">Spending by Category</h2>
+          <nav class="chart-toggle" aria-label="Pilih mode grafik">
+            <button class="chart-toggle-btn active" data-chart="expense" aria-pressed="true">💸 Expenses</button>
+            <button class="chart-toggle-btn" data-chart="income" aria-pressed="false">💵 Income</button>
+          </nav>
+        </header>
+        <figure>
+          <canvas id="spending-chart" role="img" aria-label="Donut chart pengeluaran per kategori"></canvas>
+        </figure>
+      </section>
+    </div>
+  </main>
+  <script src="js/script.js"></script>
+</body>
+</html>
